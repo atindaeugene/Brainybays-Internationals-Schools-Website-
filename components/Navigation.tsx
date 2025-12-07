@@ -30,14 +30,9 @@ const Navigation: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
         {/* Logo */}
         <div className="flex items-center gap-3">
-          <img 
-            src="https://i.imgur.com/r62s1oN.png" 
-            alt="Brainybay International Schools Logo" 
-            className="h-14 w-auto drop-shadow-md"
-          />
-          <div className="hidden sm:flex flex-col">
+          <div className="flex flex-col">
             <span className="text-xl font-bold text-white tracking-tight leading-none">Brainybay</span>
-            <span className="text-xs text-brainy-red font-semibold uppercase tracking-widest">International Schools</span>
+            <span className="text-xs text-brainy-red font-semibold uppercase tracking-widest hidden sm:block">International Schools</span>
           </div>
         </div>
 
