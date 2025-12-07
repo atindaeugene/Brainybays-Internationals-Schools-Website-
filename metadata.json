@@ -1,0 +1,7 @@
+{
+  "name": "Brainybay International Schools",
+  "description": "A premier online K-12 school offering the Cambridge Curriculum via Canvas LMS, featuring an AI-powered student assistant.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
