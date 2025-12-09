@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { useState, useEffect } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Menu, X, GraduationCap } from 'lucide-react';
 import Button from './Button';
 

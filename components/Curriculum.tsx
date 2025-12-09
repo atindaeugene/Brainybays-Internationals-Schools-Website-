@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { CurriculumLevel } from '../types';
 
@@ -31,7 +31,7 @@ const levels: CurriculumLevel[] = [
 
 const Curriculum: React.FC = () => {
   return (
-    <section id="curriculum" className="scroll-mt-28 py-24 bg-slate-800">
+    <section id="curriculum" className="py-24 bg-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">The Cambridge Pathway</h2>

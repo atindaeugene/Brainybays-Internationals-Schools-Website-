@@ -1,4 +1,5 @@
-import * as React from 'react';
+
+import React from 'react';
 import { MapPin } from 'lucide-react';
 
 const GlobalCommunity: React.FC = () => {
@@ -34,7 +35,7 @@ const GlobalCommunity: React.FC = () => {
   ];
 
   return (
-    <section id="why-online" className="scroll-mt-28 py-24 bg-slate-900 relative">
+    <section className="py-24 bg-slate-900 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Learning Knows No Boundaries</h2>

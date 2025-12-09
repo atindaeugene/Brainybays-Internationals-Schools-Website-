@@ -1,4 +1,5 @@
-import * as React from 'react';
+
+import React from 'react';
 import Button from './Button';
 import { ChevronRight, Globe, Award } from 'lucide-react';
 
@@ -8,7 +9,7 @@ const Hero: React.FC = () => {
       {/* Background with Overlay */}
       <div className="absolute inset-0 z-0">
         <img 
-          src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" 
+          src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" 
           alt="Diverse students learning online" 
           className="w-full h-full object-cover opacity-20 mix-blend-overlay"
         />
@@ -40,7 +41,7 @@ const Hero: React.FC = () => {
 
         <p className="mt-6 max-w-2xl mx-auto text-xl text-slate-300 leading-relaxed">
           Accredited K-12 International Education delivered through the world-class 
-          Canvas LMS. Limitless learning for the leaders of tomorrow.
+          Canvas LMS and BigBlueButton. Limitless learning for the leaders of tomorrow.
         </p>
 
         <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center">

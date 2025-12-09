@@ -1,16 +1,17 @@
-import * as React from 'react';
-import { Layout, CheckCircle, Smartphone, Users } from 'lucide-react';
+
+import React from 'react';
+import { Layout, CheckCircle, Video, Users } from 'lucide-react';
 
 const CanvasSpotlight: React.FC = () => {
   const features = [
-    { icon: Layout, title: "Interactive Modules", desc: "Engaging multimedia content, not just PDFs." },
-    { icon: Smartphone, title: "Mobile Learning", desc: "Learn from anywhere with the top-rated Canvas Student app." },
+    { icon: Video, title: "Live Virtual Classes", desc: "Real-time, interactive lessons powered by BigBlueButton." },
+    { icon: Layout, title: "Interactive Modules", desc: "Engaging multimedia content, not just PDFs, on Canvas." },
     { icon: CheckCircle, title: "Instant Feedback", desc: "Automated quizzes and detailed teacher feedback on assignments." },
     { icon: Users, title: "Parent Observer", desc: "Parents can link accounts to track progress in real-time." },
   ];
 
   return (
-    <section className="py-24 bg-slate-900 relative overflow-hidden">
+    <section id="why-online" className="scroll-mt-28 py-24 bg-slate-900 relative overflow-hidden">
       {/* Decorative Gradient Background */}
       <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-slate-800 to-transparent opacity-30"></div>
 
@@ -23,10 +24,10 @@ const CanvasSpotlight: React.FC = () => {
               Powered by Technology
             </h2>
             <h3 className="text-4xl font-bold text-white mb-6">
-              World-Class Learning via <span className="text-brainy-red">Canvas LMS</span>
+              World-Class Learning via <span className="text-brainy-red">Canvas & BigBlueButton</span>
             </h3>
             <p className="text-slate-300 text-lg mb-8 leading-relaxed">
-              We don't just use video calls. Brainybay leverages the power of Canvas—used by Ivy League universities—to deliver a structured, organized, and resource-rich educational experience that puts the student in control.
+              We combine the industry-leading <strong>Canvas LMS</strong> with <strong>BigBlueButton</strong> to provide a complete digital campus. Access structured course resources 24/7, and join immersive, real-time interactive classes that go far beyond standard video calls.
             </p>
 
             <div className="grid sm:grid-cols-2 gap-6">
@@ -72,7 +73,7 @@ const CanvasSpotlight: React.FC = () => {
                    <div className="absolute top-6 left-6 right-6">
                       <div className="h-8 w-1/3 bg-slate-200 rounded mb-4"></div>
                       <div className="grid grid-cols-3 gap-4">
-                        <div className="aspect-video bg-slate-100 rounded shadow-sm border border-slate-200"></div>
+                        <div className="aspect-video bg-slate-100 rounded shadow-sm border border-slate-200 flex items-center justify-center text-xs text-slate-400">Live Class</div>
                         <div className="aspect-video bg-slate-100 rounded shadow-sm border border-slate-200"></div>
                         <div className="aspect-video bg-slate-100 rounded shadow-sm border border-slate-200"></div>
                       </div>
@@ -82,12 +83,12 @@ const CanvasSpotlight: React.FC = () => {
 
               {/* Floating Badge */}
               <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-lg shadow-xl flex items-center gap-4 animate-bounce" style={{ animationDuration: '3s' }}>
-                 <div className="bg-green-100 p-2 rounded-full">
-                   <CheckCircle className="w-6 h-6 text-green-600" />
+                 <div className="bg-blue-100 p-2 rounded-full">
+                   <Video className="w-6 h-6 text-blue-600" />
                  </div>
                  <div>
-                   <div className="text-slate-900 font-bold text-sm">Assignment Submitted</div>
-                   <div className="text-slate-500 text-xs">Just now</div>
+                   <div className="text-slate-900 font-bold text-sm">Live Class in Session</div>
+                   <div className="text-slate-500 text-xs">BigBlueButton • Joined</div>
                  </div>
               </div>
             </div>

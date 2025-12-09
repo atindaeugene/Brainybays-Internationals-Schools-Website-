@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { useState } from 'react';
+
+import React, { useState } from 'react';
 import Button from './Button';
 import { X, Loader2, CheckCircle, Calendar, User, Mail, Phone, Globe, BookOpen, Download, FileText, Smartphone, Lock, CreditCard, Upload, Camera } from 'lucide-react';
 
