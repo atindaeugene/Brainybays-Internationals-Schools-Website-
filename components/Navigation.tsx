@@ -1,8 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { Menu, X, GraduationCap } from 'lucide-react';
 import Button from './Button';
 
-const Navigation: React.FC = () => {
+interface NavigationProps {
+  onOpenApplication: () => void;
+}
+
+const Navigation: React.FC<NavigationProps> = ({ onOpenApplication }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -57,7 +62,7 @@ const Navigation: React.FC = () => {
             <GraduationCap className="w-4 h-4" />
             Student Login
           </a>
-          <Button variant="primary" size="sm" onClick={() => window.location.href='#apply'}>
+          <Button variant="primary" size="sm" onClick={onOpenApplication}>
             Apply Now
           </Button>
         </div>
@@ -95,7 +100,14 @@ const Navigation: React.FC = () => {
               <GraduationCap className="w-5 h-5 text-brainy-gold" />
               Student Login
             </a>
-            <Button variant="primary" className="w-full justify-center">
+            <Button 
+              variant="primary" 
+              className="w-full justify-center"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenApplication();
+              }}
+            >
               Apply Now
             </Button>
           </div>

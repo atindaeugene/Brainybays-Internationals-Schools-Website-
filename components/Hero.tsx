@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import Button from './Button';
 import { ChevronRight, Globe, Award } from 'lucide-react';
 
@@ -8,7 +8,7 @@ const Hero: React.FC = () => {
       {/* Background with Overlay */}
       <div className="absolute inset-0 z-0">
         <img 
-          src="https://picsum.photos/1920/1080?grayscale&blur=2" 
+          src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" 
           alt="Diverse students learning online" 
           className="w-full h-full object-cover opacity-20 mix-blend-overlay"
         />
@@ -44,10 +44,10 @@ const Hero: React.FC = () => {
         </p>
 
         <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Button variant="primary" size="lg" className="w-full sm:w-auto">
+          <Button variant="primary" size="lg" className="w-full sm:w-auto" onClick={() => window.location.href='#curriculum'}>
             Explore Our Programs <ChevronRight className="w-5 h-5" />
           </Button>
-          <Button variant="outline" size="lg" className="w-full sm:w-auto">
+          <Button variant="outline" size="lg" className="w-full sm:w-auto" onClick={() => window.location.href='#admissions'}>
             Request Prospectus
           </Button>
         </div>

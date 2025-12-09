@@ -1,11 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Mic, MicOff, Sparkles, Volume2 } from 'lucide-react';
+import * as React from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { MessageCircle, X, Send, Mic, MicOff, Sparkles, Volume2, Phone, MessageSquare } from 'lucide-react';
 import { GoogleGenAI, LiveServerMessage, Modality } from "@google/genai";
 import { sendMessageToGemini, SYSTEM_INSTRUCTION } from '../services/geminiService';
 import { ChatMessage, LoadingState } from '../types';
 
 const VoiceAgent: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'ai' | 'whatsapp'>('ai');
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState<LoadingState>(LoadingState.IDLE);
   const [isVoiceActive, setIsVoiceActive] = useState(false);
@@ -38,8 +40,10 @@ const VoiceAgent: React.FC = () => {
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, isOpen, isVoiceActive]);
+    if (activeTab === 'ai') {
+      scrollToBottom();
+    }
+  }, [messages, isOpen, isVoiceActive, activeTab]);
 
   // Clean up audio on unmount
   useEffect(() => {
@@ -47,6 +51,13 @@ const VoiceAgent: React.FC = () => {
       stopVoiceMode();
     };
   }, []);
+
+  const handleTabChange = (tab: 'ai' | 'whatsapp') => {
+    setActiveTab(tab);
+    if (tab === 'whatsapp') {
+      stopVoiceMode();
+    }
+  };
 
   const handleSend = async () => {
     if (!input.trim() || loading === LoadingState.THINKING) return;
@@ -109,7 +120,7 @@ const VoiceAgent: React.FC = () => {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaStreamRef.current = stream;
 
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
       // Connect to Live API
       const sessionPromise = ai.live.connect({
@@ -120,6 +131,7 @@ const VoiceAgent: React.FC = () => {
             voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } },
           },
           systemInstruction: SYSTEM_INSTRUCTION,
+          // Explicitly empty transcription config to avoid invalid argument errors
         },
         callbacks: {
           onopen: () => {
@@ -151,7 +163,7 @@ const VoiceAgent: React.FC = () => {
                     if (visualizerRef.current) {
                       visualizerRef.current.style.transform = `scale(${scale})`;
                       visualizerRef.current.style.opacity = opacity.toString();
-                      visualizerRef.current.style.boxShadow = `0 0 ${volume / 5}px ${volume / 10}px rgba(220, 38, 38, 0.5)`;
+                      visualizerRef.current.style.boxShadow = `0 0 ${volume / 5}px ${volume / 10}px rgba(128, 0, 0, 0.5)`;
                     }
                 }
                 animationFrameRef.current = requestAnimationFrame(updateVisualizer);
@@ -341,108 +353,157 @@ const VoiceAgent: React.FC = () => {
         <div className="mb-4 w-80 md:w-96 glass-panel rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-brainy-red/30 animate-in slide-in-from-bottom-5 fade-in duration-300">
           
           {/* Header */}
-          <div className={`p-4 flex justify-between items-center transition-colors duration-500 relative overflow-hidden ${isVoiceActive ? 'bg-red-900/90' : 'bg-gradient-to-r from-brainy-navy to-slate-800'}`}>
-            
-            {/* Visualizer Background Ring (only visible in voice mode) */}
-            <div 
-              ref={visualizerRef}
-              className="absolute left-6 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-red-500/30 pointer-events-none transition-all duration-75 z-0"
-              style={{ opacity: 0 }}
-            />
-
-            <div className="flex items-center gap-3 z-10">
-              <div className="bg-white p-1.5 rounded-full relative shadow">
-                <Sparkles className={`w-4 h-4 ${isVoiceActive ? 'text-red-500' : 'text-brainy-red'}`} />
-              </div>
-              <div>
-                <h3 className="font-bold text-white text-sm">BB Assistant</h3>
-                <p className="text-white/80 text-xs flex items-center gap-1">
-                   {isVoiceActive ? (
-                       <>
-                        <Volume2 className="w-3 h-3 animate-pulse" />
-                        Listening...
-                       </>
-                   ) : (
-                       'AI Study Partner • Online'
-                   )}
-                </p>
-              </div>
-            </div>
-            <button 
-              onClick={() => {
-                  stopVoiceMode();
-                  setIsOpen(false);
-              }}
-              className="text-white hover:bg-white/20 rounded-full p-1 transition z-10"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Messages Area */}
-          <div className="h-80 overflow-y-auto p-4 space-y-4 bg-slate-900/90">
-            {messages.map((msg) => (
-              <div 
-                key={msg.id} 
-                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
+          <div className="bg-gradient-to-r from-brainy-navy to-slate-900 border-b border-white/10">
+            {/* Top Bar */}
+            <div className="p-4 flex justify-between items-center relative overflow-hidden">
+                {/* Visualizer Background Ring (only visible in voice mode) */}
                 <div 
-                  className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed ${
-                    msg.role === 'user' 
-                      ? 'bg-brainy-red text-white rounded-br-none' 
-                      : 'bg-slate-700 text-gray-100 rounded-bl-none border border-slate-600'
-                  }`}
+                ref={visualizerRef}
+                className="absolute left-6 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-red-500/30 pointer-events-none transition-all duration-75 z-0"
+                style={{ opacity: 0 }}
+                />
+
+                <div className="flex items-center gap-3 z-10">
+                    <div className="bg-white p-1.5 rounded-full relative shadow">
+                        <Sparkles className={`w-4 h-4 ${isVoiceActive ? 'text-red-500' : 'text-brainy-red'}`} />
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-white text-sm">Brainybay Support</h3>
+                        <p className="text-white/60 text-[10px] flex items-center gap-1">
+                        {isVoiceActive ? (
+                            <>
+                                <Volume2 className="w-3 h-3 animate-pulse text-red-400" />
+                                <span className="text-red-300 font-medium">Listening...</span>
+                            </>
+                        ) : (
+                            'Online'
+                        )}
+                        </p>
+                    </div>
+                </div>
+                <button 
+                onClick={() => {
+                    stopVoiceMode();
+                    setIsOpen(false);
+                }}
+                className="text-white hover:bg-white/20 rounded-full p-1 transition z-10"
                 >
-                  {msg.text}
-                </div>
-              </div>
-            ))}
-            {loading === LoadingState.THINKING && !isVoiceActive && (
-              <div className="flex justify-start">
-                <div className="bg-slate-700 p-3 rounded-2xl rounded-bl-none border border-slate-600 flex gap-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
+                <X className="w-5 h-5" />
+                </button>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex text-sm font-medium">
+                <button 
+                    onClick={() => handleTabChange('ai')}
+                    className={`flex-1 py-2 text-center transition-colors border-b-2 flex items-center justify-center gap-2 ${activeTab === 'ai' ? 'border-brainy-red text-white bg-white/5' : 'border-transparent text-slate-400 hover:text-white'}`}
+                >
+                    <Sparkles className="w-3 h-3" /> AI Assistant
+                </button>
+                <button 
+                    onClick={() => handleTabChange('whatsapp')}
+                    className={`flex-1 py-2 text-center transition-colors border-b-2 flex items-center justify-center gap-2 ${activeTab === 'whatsapp' ? 'border-green-500 text-white bg-white/5' : 'border-transparent text-slate-400 hover:text-white'}`}
+                >
+                    <Phone className="w-3 h-3" /> WhatsApp
+                </button>
+            </div>
           </div>
 
-          {/* Input Area */}
-          <div className="p-3 bg-slate-950 border-t border-slate-800 flex gap-2 items-center">
-            <button 
-                onClick={toggleVoiceMode}
-                className={`transition p-2 rounded-full ${isVoiceActive ? 'bg-red-500/20 text-red-500 ring-2 ring-red-500/50' : 'text-gray-400 hover:text-brainy-red'}`}
-                title={isVoiceActive ? "Stop Voice Mode" : "Start Voice Mode"}
-            >
-              {isVoiceActive ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-            </button>
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyPress}
-              placeholder={isVoiceActive ? "Listening..." : "Type your question..."}
-              disabled={isVoiceActive}
-              className="flex-1 bg-slate-900 border border-slate-700 rounded-full px-4 py-2 text-sm text-white focus:outline-none focus:border-brainy-red transition disabled:opacity-50"
-            />
-            <button 
-              onClick={handleSend}
-              disabled={loading === LoadingState.THINKING || !input.trim() || isVoiceActive}
-              className="bg-brainy-red text-white rounded-full p-2 hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Send className="w-5 h-5" />
-            </button>
-          </div>
+          {/* Body Content */}
+          {activeTab === 'ai' ? (
+              <>
+                {/* Messages Area */}
+                <div className="h-80 overflow-y-auto p-4 space-y-4 bg-slate-900/90 scrollbar-thin scrollbar-thumb-slate-700">
+                    {messages.map((msg) => (
+                    <div 
+                        key={msg.id} 
+                        className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                    >
+                        <div 
+                        className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm ${
+                            msg.role === 'user' 
+                            ? 'bg-brainy-red text-white rounded-br-none' 
+                            : 'bg-slate-700 text-gray-100 rounded-bl-none border border-slate-600'
+                        }`}
+                        >
+                        {msg.text}
+                        </div>
+                    </div>
+                    ))}
+                    {loading === LoadingState.THINKING && !isVoiceActive && (
+                    <div className="flex justify-start">
+                        <div className="bg-slate-700 p-3 rounded-2xl rounded-bl-none border border-slate-600 flex gap-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                        </div>
+                    </div>
+                    )}
+                    <div ref={messagesEndRef} />
+                </div>
+
+                {/* Input Area */}
+                <div className="p-3 bg-slate-950 border-t border-slate-800 flex gap-2 items-center">
+                    <button 
+                        onClick={toggleVoiceMode}
+                        className={`transition p-2 rounded-full ${isVoiceActive ? 'bg-red-500/20 text-red-500 ring-2 ring-red-500/50' : 'text-gray-400 hover:text-brainy-red hover:bg-slate-800'}`}
+                        title={isVoiceActive ? "Stop Voice Mode" : "Start Voice Mode"}
+                    >
+                    {isVoiceActive ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                    </button>
+                    <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyPress}
+                    placeholder={isVoiceActive ? "Listening..." : "Type your question..."}
+                    disabled={isVoiceActive}
+                    className="flex-1 bg-slate-900 border border-slate-700 rounded-full px-4 py-2 text-sm text-white focus:outline-none focus:border-brainy-red transition disabled:opacity-50 disabled:cursor-not-allowed placeholder-slate-500"
+                    />
+                    <button 
+                    onClick={handleSend}
+                    disabled={loading === LoadingState.THINKING || !input.trim() || isVoiceActive}
+                    className="bg-brainy-red text-white rounded-full p-2 hover:bg-red-900 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                    <Send className="w-4 h-4" />
+                    </button>
+                </div>
+              </>
+          ) : (
+              // WhatsApp Tab Content
+              <div className="h-[380px] bg-slate-900 p-6 flex flex-col items-center justify-center text-center">
+                  <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mb-6 ring-1 ring-green-500/30">
+                      <MessageSquare className="w-10 h-10 text-green-500" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">Chat with Admissions</h3>
+                  <p className="text-slate-400 text-sm mb-8 max-w-[240px]">
+                      Connect directly with our admissions team on WhatsApp for instant support.
+                  </p>
+                  
+                  <a 
+                    href="https://wa.me/254720066035?text=Hello%20Brainybay%2C%20I%20would%20like%20to%20enquire%20about%20admissions."
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02] shadow-lg shadow-green-900/20"
+                  >
+                      <MessageCircle className="w-5 h-5" />
+                      Open WhatsApp
+                  </a>
+                  
+                  <div className="mt-6 flex items-center gap-2 text-[10px] text-slate-500">
+                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                      Typical reply time: 5 minutes
+                  </div>
+              </div>
+          )}
         </div>
       )}
 
       {/* Toggle Button */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className={`rounded-full p-4 shadow-lg shadow-brainy-red/20 transition-all duration-300 transform hover:scale-110 flex items-center justify-center ${
-          isOpen ? 'bg-slate-700 text-white' : 'bg-brainy-red text-white'
+        className={`rounded-full p-4 shadow-xl shadow-brainy-red/20 transition-all duration-300 transform hover:scale-110 flex items-center justify-center border-2 border-white/10 ${
+          isOpen ? 'bg-slate-800 text-white' : 'bg-brainy-red text-white'
         }`}
       >
         {isOpen ? <X className="w-8 h-8" /> : <MessageCircle className="w-8 h-8" />}

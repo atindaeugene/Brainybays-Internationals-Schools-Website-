@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { Layout, CheckCircle, Smartphone, Users } from 'lucide-react';
 
 const CanvasSpotlight: React.FC = () => {
@@ -10,7 +10,7 @@ const CanvasSpotlight: React.FC = () => {
   ];
 
   return (
-    <section id="why-online" className="py-24 bg-slate-900 relative overflow-hidden">
+    <section className="py-24 bg-slate-900 relative overflow-hidden">
       {/* Decorative Gradient Background */}
       <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-slate-800 to-transparent opacity-30"></div>
 

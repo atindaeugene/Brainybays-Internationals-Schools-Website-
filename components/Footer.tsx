@@ -1,9 +1,9 @@
-import React from 'react';
+import * as React from 'react';
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-slate-950 text-slate-400 pt-16 pb-8 border-t border-slate-800">
+    <footer id="contact" className="scroll-mt-28 bg-slate-950 text-slate-400 pt-16 pb-8 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-4 gap-12 mb-12">
           

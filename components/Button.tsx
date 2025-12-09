@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline';
@@ -15,7 +15,7 @@ const Button: React.FC<ButtonProps> = ({
   const baseStyles = "font-medium rounded-full transition-all duration-300 flex items-center justify-center gap-2";
   
   const variants = {
-    primary: "bg-brainy-red text-white hover:bg-red-700 hover:shadow-lg hover:shadow-red-900/20 border border-transparent",
+    primary: "bg-brainy-red text-white hover:bg-red-950 hover:shadow-lg hover:shadow-red-900/20 border border-transparent",
     secondary: "bg-brainy-gold text-brainy-navy hover:bg-yellow-400 border border-transparent",
     outline: "bg-transparent border border-brainy-red text-brainy-red hover:bg-brainy-red/10"
   };
