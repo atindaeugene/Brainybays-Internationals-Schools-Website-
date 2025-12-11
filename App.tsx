@@ -8,6 +8,7 @@ import Admissions from './components/Admissions';
 import Footer from './components/Footer';
 import VoiceAgent from './components/VoiceAgent';
 import GlobalCommunity from './components/GlobalCommunity';
+import WhyChooseUs from './components/WhyChooseUs';
 
 function App() {
   const [showApplicationForm, setShowApplicationForm] = useState(false);
@@ -18,6 +19,7 @@ function App() {
       
       <main>
         <Hero />
+        <WhyChooseUs />
         <Curriculum />
         <GlobalCommunity />
         <CanvasSpotlight />

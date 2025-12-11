@@ -6,7 +6,7 @@ const GlobalCommunity: React.FC = () => {
   const students = [
     {
       id: 1,
-      image: "https://images.unsplash.com/photo-1589330694653-3a86c4ee9732?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image: "https://images.unsplash.com/photo-1571260899304-425eee4c7efc?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       location: "Nairobi, Kenya",
       grade: "Year 10 (IGCSE)",
       size: "large"
