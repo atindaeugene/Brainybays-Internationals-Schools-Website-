@@ -9,6 +9,7 @@ import Footer from './components/Footer';
 import VoiceAgent from './components/VoiceAgent';
 import GlobalCommunity from './components/GlobalCommunity';
 import WhyChooseUs from './components/WhyChooseUs';
+import Contact from './components/Contact';
 
 function App() {
   const [showApplicationForm, setShowApplicationForm] = useState(false);
@@ -24,6 +25,7 @@ function App() {
         <GlobalCommunity />
         <CanvasSpotlight />
         <Admissions showForm={showApplicationForm} setShowForm={setShowApplicationForm} />
+        <Contact />
       </main>
 
       <Footer />
@@ -33,3 +35,4 @@ function App() {
 }
 
 export default App;
+    

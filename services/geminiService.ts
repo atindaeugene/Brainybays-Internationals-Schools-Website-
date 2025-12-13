@@ -17,7 +17,9 @@ About Brainybay:
 
 Contact Information:
 - Location: The Crescent Business Center, Westlands, 6th Floor, Suite 14.
-- Email: brainy@brainybayschools.com
+- General Email: brainy@brainybayschools.com
+- Admissions Email: admissions@brainybayschools.com
+- Director Email: director@brainybayschools.com
 - Phone: +254 720 066 035
 
 Fee Structure (Tuition Per Term in KES):

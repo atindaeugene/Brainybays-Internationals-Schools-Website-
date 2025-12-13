@@ -24,6 +24,7 @@ const Admissions: React.FC<AdmissionsProps> = ({ showForm, setShowForm }) => {
   const [showFees, setShowFees] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
+  const [generatedMailtoLink, setGeneratedMailtoLink] = useState('');
   
   // Payment States
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'waiting' | 'success' | 'failed'>('idle');
@@ -85,24 +86,68 @@ const Admissions: React.FC<AdmissionsProps> = ({ showForm, setShowForm }) => {
     }
   };
 
-  const initiateMpesaPayment = () => {
+  const initiateMpesaPayment = async () => {
+    // Basic validation and formatting for Kenyan phone numbers
+    let formattedPhone = mpesaNumber.replace(/\D/g, ''); // Remove non-digits
+    
+    // Convert 07xx or 01xx to 2547xx or 2541xx
+    if (formattedPhone.startsWith('0')) {
+        formattedPhone = '254' + formattedPhone.substring(1);
+    }
+    
+    // Check for valid length (254 + 9 digits = 12 digits)
+    if (formattedPhone.length !== 12 || !formattedPhone.startsWith('254')) {
+        alert("Please enter a valid Safaricom number (e.g., 0712345678 or 01...)");
+        return;
+    }
+
     setPaymentStatus('processing');
     
-    // Simulate API Call to Daraja
-    setTimeout(() => {
+    try {
+        // SIMULATION: In a real app, this would be a fetch call to your backend
+        /*
+        const response = await fetch('https://api.brainybayschools.com/mpesa/stk-push', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                phoneNumber: formattedPhone, 
+                amount: APPLICATION_FEE,
+                accountReference: `BIS-${formData.studentName.split(' ')[0].toUpperCase()}`
+            })
+        });
+        */
+        
+        console.group("M-PESA STK Push Simulation");
+        console.log(`Sending STK Push to: ${formattedPhone}`);
+        console.log(`Amount: KES ${APPLICATION_FEE}`);
+        console.log(`Account Ref: BIS-${formData.studentName.split(' ')[0].toUpperCase()}`);
+        console.groupEnd();
+
+        // Simulate API network latency
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
         setPaymentStatus('waiting');
         
-        // Simulate User entering PIN on phone (wait 4 seconds)
+        // SIMULATION: Waiting for user to enter PIN on their phone
+        // In a real scenario, this would involve polling a status endpoint or waiting for a callback
+        console.log("Waiting for user input on mobile device...");
+        
+        await new Promise(resolve => setTimeout(resolve, 5000)); // 5 seconds wait for simulation
+        
+        console.log("Payment Confirmed via Callback.");
+        setPaymentStatus('success');
+        
+        // Auto submit application after payment success
         setTimeout(() => {
-            setPaymentStatus('success');
-            
-            // Auto submit application after payment success
-            setTimeout(() => {
-                finalizeApplicationSubmission();
-            }, 1500);
-            
-        }, 4000);
-    }, 1500);
+            finalizeApplicationSubmission();
+        }, 1500);
+
+    } catch (error) {
+        console.error("Payment Error", error);
+        setPaymentStatus('failed');
+        // Reset to idle after a moment so they can try again
+        setTimeout(() => setPaymentStatus('idle'), 3000);
+    }
   };
 
   const finalizeApplicationSubmission = () => {
@@ -111,12 +156,61 @@ const Admissions: React.FC<AdmissionsProps> = ({ showForm, setShowForm }) => {
     const transactionId = "MPESA_" + Math.random().toString(36).substr(2, 9).toUpperCase();
     
     setTimeout(() => {
-      console.log('Application & Payment Submitted to admin@brainybayschools.com:', { 
+      const submissionData = { 
           ...formData, 
           studentImage: formData.studentImage ? formData.studentImage.name : 'No image',
           transactionId, 
-          amount: APPLICATION_FEE 
-      });
+          amount: APPLICATION_FEE,
+          // Explicit recipients as requested
+          recipients: ['admissions@brainybayschools.com', 'admin@brainybayschools.com', 'director@brainybayschools.com']
+      };
+
+      console.group('Application Submission');
+      console.log('Status: Sending to School Administration');
+      console.log('To: admissions@brainybayschools.com');
+      console.log('CC: admin@brainybayschools.com, director@brainybayschools.com');
+      console.log('Payload:', submissionData);
+      console.groupEnd();
+
+      // --- EMAIL SENDING LOGIC (MAILTO FALLBACK) ---
+      const emailSubject = `New Student Application: ${formData.studentName} (${formData.gradeLevel})`;
+      const emailBody = `
+Dear Admissions Team,
+
+A new student application has been submitted via the Online Portal.
+
+--- PAYMENT CONFIRMATION ---
+Transaction Ref: ${transactionId}
+Amount Paid: KES ${APPLICATION_FEE.toLocaleString()}
+Payer Number: ${mpesaNumber}
+
+--- STUDENT DETAILS ---
+Full Name: ${formData.studentName}
+Date of Birth: ${formData.dateOfBirth}
+Grade Applying For: ${formData.gradeLevel}
+
+--- PARENT/GUARDIAN DETAILS ---
+Name: ${formData.parentName}
+Email: ${formData.email}
+Phone: ${formData.phone}
+Country: ${formData.country}
+
+--- ADDITIONAL MESSAGE ---
+${formData.message || "None provided"}
+
+------------------------------------------------
+This email was auto-generated by the application portal.
+Please review the details above.
+`;
+
+      // Construct the mailto link
+      const mailtoLink = `mailto:admissions@brainybayschools.com,admin@brainybayschools.com,director@brainybayschools.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+      setGeneratedMailtoLink(mailtoLink);
+
+      // Attempt to open the default email client
+      // Note: This requires a default email client to be configured on the user's device.
+      window.location.href = mailtoLink;
+      
       setFormStatus('success');
       setShowPayment(false); 
     }, 1000);
@@ -127,6 +221,7 @@ const Admissions: React.FC<AdmissionsProps> = ({ showForm, setShowForm }) => {
     setShowPayment(false);
     setFormStatus('idle');
     setPaymentStatus('idle');
+    setGeneratedMailtoLink('');
     setFormData({
       studentName: '',
       dateOfBirth: '',
@@ -204,11 +299,35 @@ const Admissions: React.FC<AdmissionsProps> = ({ showForm, setShowForm }) => {
                   <div className="w-20 h-20 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mb-4">
                     <CheckCircle size={40} />
                   </div>
-                  <h3 className="text-3xl font-bold text-white">Application Received!</h3>
+                  <h3 className="text-2xl font-bold text-white">Application Draft Prepared</h3>
                   <p className="text-slate-300 max-w-md">
-                    Thank you for applying to Brainybay International Schools. Your payment of <strong>KES {APPLICATION_FEE.toLocaleString()}</strong> was successful. We have sent a confirmation email to <strong>{formData.email}</strong>.
+                    Your payment of <strong>KES {APPLICATION_FEE.toLocaleString()}</strong> was successful.
                   </p>
-                  <Button variant="primary" onClick={resetForm} className="mt-6">Close</Button>
+                  
+                  <div className="w-full max-w-md bg-brainy-blue/20 rounded-xl p-6 border border-brainy-blue/30 mt-4">
+                      <p className="text-white text-lg font-bold mb-2">Confirmation Required</p>
+                      <p className="text-slate-200 text-sm mb-4">
+                        An email draft has been opened in your default mail app. <br/>
+                        <span className="text-brainy-gold font-bold">You must click "Send" in your email app to complete the submission.</span>
+                      </p>
+                      
+                      <Button 
+                        variant="primary" 
+                        onClick={() => window.location.href = generatedMailtoLink}
+                        className="w-full flex justify-center items-center gap-2 mb-3"
+                      >
+                         <Mail size={18} /> Open Email App Again
+                      </Button>
+
+                      <p className="text-slate-400 text-xs leading-relaxed text-left">
+                        Recipients:
+                          <br/><span className="text-brainy-red font-semibold">• admissions@brainybayschools.com</span>
+                          <br/><span className="text-brainy-red font-semibold">• admin@brainybayschools.com</span>
+                          <br/><span className="text-brainy-red font-semibold">• director@brainybayschools.com</span>
+                      </p>
+                  </div>
+
+                  <Button variant="outline" onClick={resetForm} className="mt-4">Close & Return Home</Button>
                 </div>
               ) : (
                 <>
@@ -263,7 +382,20 @@ const Admissions: React.FC<AdmissionsProps> = ({ showForm, setShowForm }) => {
                                          <Smartphone className="text-green-500 w-6 h-6 shrink-0 mt-1" />
                                          <div>
                                              <h5 className="font-bold text-green-400 text-sm">Check your phone</h5>
-                                             <p className="text-xs text-green-300/80 mt-1">An M-PESA pop-up has been sent to {mpesaNumber}. Please enter your PIN to complete the payment.</p>
+                                             <p className="text-xs text-green-300/80 mt-1">
+                                                 An M-PESA STK push has been sent to {mpesaNumber.replace(/\D/g, '').replace(/^0/, '254')}. 
+                                                 Please enter your PIN to complete the payment.
+                                             </p>
+                                         </div>
+                                     </div>
+                                 )}
+                                 
+                                 {paymentStatus === 'failed' && (
+                                     <div className="bg-red-900/20 border border-red-500/30 p-4 rounded-lg flex gap-4 items-start">
+                                         <X className="text-red-500 w-6 h-6 shrink-0 mt-1" />
+                                         <div>
+                                             <h5 className="font-bold text-red-400 text-sm">Payment Failed</h5>
+                                             <p className="text-xs text-red-300/80 mt-1">Unable to initiate payment. Please check your number and try again.</p>
                                          </div>
                                      </div>
                                  )}
@@ -271,9 +403,9 @@ const Admissions: React.FC<AdmissionsProps> = ({ showForm, setShowForm }) => {
                                  <Button 
                                     onClick={initiateMpesaPayment}
                                     className="w-full bg-green-600 hover:bg-green-700 text-white py-4"
-                                    disabled={paymentStatus !== 'idle' || !mpesaNumber}
+                                    disabled={paymentStatus === 'processing' || paymentStatus === 'waiting' || !mpesaNumber}
                                  >
-                                     {paymentStatus === 'idle' && `Pay KES ${APPLICATION_FEE.toLocaleString()}`}
+                                     {paymentStatus === 'idle' || paymentStatus === 'failed' ? `Pay KES ${APPLICATION_FEE.toLocaleString()}` : ''}
                                      {paymentStatus === 'processing' && ( <><Loader2 className="w-5 h-5 animate-spin mr-2"/> Sending Request...</>)}
                                      {paymentStatus === 'waiting' && ( <><Lock className="w-5 h-5 mr-2"/> Waiting for PIN...</>)}
                                  </Button>

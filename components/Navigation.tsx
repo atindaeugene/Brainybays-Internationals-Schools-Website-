@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Menu, X, GraduationCap } from 'lucide-react';
+import { Menu, X, GraduationCap, School } from 'lucide-react';
 import Button from './Button';
 
 interface NavigationProps {
@@ -10,6 +10,7 @@ interface NavigationProps {
 const Navigation: React.FC<NavigationProps> = ({ onOpenApplication }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [logoError, setLogoError] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -35,6 +36,18 @@ const Navigation: React.FC<NavigationProps> = ({ onOpenApplication }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
         {/* Logo */}
         <div className="flex items-center gap-3">
+          {!logoError ? (
+            <img 
+              src="https://brainybayschools.com/wp-content/uploads/2023/10/cropped-BRAINYBAY-SCHOOLS-LOGO-01-192x192.png" 
+              alt="Brainybay Schools Logo" 
+              className="h-14 w-auto object-contain bg-white rounded-lg p-1"
+              onError={() => setLogoError(true)}
+            />
+          ) : (
+            <div className="h-14 w-14 bg-white rounded-lg p-1 flex items-center justify-center">
+              <School className="w-8 h-8 text-brainy-navy" />
+            </div>
+          )}
           <div className="flex flex-col">
             <span className="text-xl font-bold text-white tracking-tight leading-none">Brainybay</span>
             <span className="text-xs text-brainy-red font-semibold uppercase tracking-widest hidden sm:block">International Schools</span>
