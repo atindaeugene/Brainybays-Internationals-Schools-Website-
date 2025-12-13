@@ -28,6 +28,7 @@ const VoiceAgent: React.FC = () => {
   const sessionRef = useRef<any>(null);
   const nextStartTimeRef = useRef<number>(0);
   const sourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
+  const currentTurnIdRef = useRef<string | null>(null);
   
   // Visualizer Refs
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -99,6 +100,7 @@ const VoiceAgent: React.FC = () => {
   const startVoiceMode = async () => {
     try {
       setIsVoiceActive(true);
+      currentTurnIdRef.current = null;
       
       // Initialize Audio Contexts
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
@@ -121,6 +123,8 @@ const VoiceAgent: React.FC = () => {
             voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } },
           },
           systemInstruction: SYSTEM_INSTRUCTION,
+          inputAudioTranscription: {}, 
+          outputAudioTranscription: {}, 
         },
         callbacks: {
           onopen: () => {
@@ -228,6 +232,7 @@ const VoiceAgent: React.FC = () => {
 
     // Close Session if possible
     sessionRef.current = null;
+    currentTurnIdRef.current = null;
   };
 
   const toggleVoiceMode = () => {
@@ -250,6 +255,45 @@ const VoiceAgent: React.FC = () => {
         if (audioContextRef.current) {
             nextStartTimeRef.current = audioContextRef.current.currentTime;
         }
+        currentTurnIdRef.current = null; // Reset turn on interruption
+      }
+
+      if (serverContent.turnComplete) {
+         currentTurnIdRef.current = null;
+      }
+      
+      // Handle Transcriptions (Input)
+      if (serverContent.inputTranscription) {
+        const text = serverContent.inputTranscription.text;
+        if (text) {
+          setMessages(prev => {
+             const lastMsg = prev[prev.length - 1];
+             if (lastMsg && lastMsg.role === 'user' && currentTurnIdRef.current === lastMsg.id) {
+                 return [...prev.slice(0, -1), { ...lastMsg, text: lastMsg.text + text }];
+             } else {
+                 const newId = Date.now().toString();
+                 currentTurnIdRef.current = newId;
+                 return [...prev, { id: newId, role: 'user', text: text, timestamp: new Date() }];
+             }
+          });
+        }
+      }
+
+      // Handle Transcriptions (Output)
+      if (serverContent.outputTranscription) {
+         const text = serverContent.outputTranscription.text;
+         if (text) {
+           setMessages(prev => {
+              const lastMsg = prev[prev.length - 1];
+              if (lastMsg && lastMsg.role === 'model' && currentTurnIdRef.current === lastMsg.id) {
+                  return [...prev.slice(0, -1), { ...lastMsg, text: lastMsg.text + text }];
+              } else {
+                  const newId = Date.now().toString();
+                  currentTurnIdRef.current = newId;
+                  return [...prev, { id: newId, role: 'model', text: text, timestamp: new Date() }];
+              }
+           });
+         }
       }
     }
 
