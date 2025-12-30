@@ -1,96 +1,70 @@
 
-import React, { useState } from 'react';
-import { Quote, ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import React from 'react';
+import { Quote, Star, MapPin } from 'lucide-react';
 import { Testimonial } from '../types';
 
 const testimonials: Testimonial[] = [
   {
     name: "Sarah M.",
-    role: "Parent of Year 9 Student",
-    quote: "Brainybay changed our lives. My daughter was struggling in a traditional setting, but the personalized attention on Canvas and the flexibility of online classes allowed her to thrive.",
-    location: "Nairobi, Kenya"
+    role: "Parent of Year 8 Student",
+    location: "Mombasa, Kenya",
+    quote: "Brainybay has transformed how my son learns. The combination of live classes and the Canvas platform means he never falls behind. It's truly world-class education from home."
   },
   {
-    name: "Dr. James Ochieng",
-    role: "A-Level Parent",
-    quote: "As a busy professional, the Parent Observer role in Canvas is brilliant. I can see my son's progress and upcoming deadlines without having to ask. The Cambridge standards are world-class.",
-    location: "Kampala, Uganda"
-  },
-  {
-    name: "Elena V.",
+    name: "David K.",
     role: "IGCSE Student",
-    quote: "The BigBlueButton classes are so interactive! I feel more connected to my teachers here than I ever did in my old physical school. Plus, I can re-watch recorded lessons anytime.",
-    location: "Dar es Salaam, Tanzania"
+    location: "Kampala, Uganda",
+    quote: "I was worried about online schooling, but the teachers are so engaging. The AI study partner helps me late at night when I'm revising for exams. I feel fully prepared."
+  },
+  {
+    name: "Priya Patel",
+    role: "A-Level Student",
+    location: "London, UK (Expat)",
+    quote: "Transitioning from a physical school was seamless. The Cambridge curriculum is rigorous, and the flexibility allows me to pursue my tennis training alongside my studies."
   }
 ];
 
 const Testimonials: React.FC = () => {
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  const next = () => setActiveIndex((prev) => (prev + 1) % testimonials.length);
-  const prev = () => setActiveIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
-
   return (
-    <section className="py-24 bg-slate-950 relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(128,0,0,0.05),transparent)] pointer-events-none"></div>
-      
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <section className="py-24 bg-brainy-navy relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <Quote className="w-12 h-12 text-brainy-red mx-auto mb-6 opacity-50" />
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Voices of Our Community</h2>
-          <div className="flex justify-center gap-1 mb-2">
-            {[...Array(5)].map((_, i) => <Star key={i} size={16} className="fill-brainy-gold text-brainy-gold" />)}
-          </div>
+          <h2 className="text-brainy-gold font-semibold tracking-wide uppercase text-sm mb-3">
+            Community Voices
+          </h2>
+          <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            Trusted by Families
+          </h3>
         </div>
 
-        <div className="relative">
-          <div className="overflow-hidden">
-            <div 
-              className="flex transition-transform duration-500 ease-in-out" 
-              style={{ transform: `translateX(-${activeIndex * 100}%)` }}
-            >
-              {testimonials.map((t, i) => (
-                <div key={i} className="w-full shrink-0 px-4">
-                  <div className="bg-slate-900/50 border border-slate-800 p-8 md:p-12 rounded-3xl backdrop-blur-sm">
-                    <p className="text-xl md:text-2xl text-slate-200 italic leading-relaxed mb-8">
-                      "{t.quote}"
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="text-white font-bold text-lg">{t.name}</h4>
-                        <p className="text-brainy-red text-sm font-medium">{t.role}</p>
-                        <p className="text-slate-500 text-xs mt-1">{t.location}</p>
-                      </div>
-                    </div>
+        <div className="grid md:grid-cols-3 gap-8">
+          {testimonials.map((item, idx) => (
+            <div key={idx} className="bg-slate-800/50 p-8 rounded-2xl border border-slate-700 hover:border-brainy-gold/30 transition-all duration-300 hover:transform hover:-translate-y-2">
+              <div className="mb-6">
+                <Quote className="w-10 h-10 text-brainy-red opacity-50" />
+              </div>
+              <p className="text-slate-300 italic mb-6 leading-relaxed">
+                "{item.quote}"
+              </p>
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-white font-bold">
+                  {item.name.charAt(0)}
+                </div>
+                <div>
+                  <h4 className="text-white font-bold text-sm">{item.name}</h4>
+                  <div className="text-xs text-brainy-gold mb-1">{item.role}</div>
+                  <div className="flex items-center text-[10px] text-slate-500">
+                    <MapPin size={10} className="mr-1" /> {item.location}
                   </div>
                 </div>
-              ))}
+              </div>
+              <div className="mt-4 flex gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} size={12} className="text-brainy-gold fill-brainy-gold" />
+                ))}
+              </div>
             </div>
-          </div>
-
-          {/* Controls */}
-          <div className="flex justify-center gap-4 mt-12">
-            <button 
-              onClick={prev}
-              className="p-3 rounded-full border border-slate-700 text-slate-400 hover:text-white hover:border-brainy-red transition-all"
-            >
-              <ChevronLeft size={24} />
-            </button>
-            <div className="flex items-center gap-2">
-              {testimonials.map((_, i) => (
-                <div 
-                  key={i} 
-                  className={`h-1.5 rounded-full transition-all duration-300 ${i === activeIndex ? 'w-8 bg-brainy-red' : 'w-2 bg-slate-700'}`}
-                />
-              ))}
-            </div>
-            <button 
-              onClick={next}
-              className="p-3 rounded-full border border-slate-700 text-slate-400 hover:text-white hover:border-brainy-red transition-all"
-            >
-              <ChevronRight size={24} />
-            </button>
-          </div>
+          ))}
         </div>
       </div>
     </section>
