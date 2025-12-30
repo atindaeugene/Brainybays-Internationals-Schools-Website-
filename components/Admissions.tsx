@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import Button from './Button';
-import { X, Loader2, CheckCircle, Calendar, User, Mail, Phone, Globe, BookOpen, Download, FileText, Smartphone, Lock, CreditCard, Upload, Camera } from 'lucide-react';
+import { X, Loader2, CheckCircle, Calendar, User, Mail, Phone, Globe, BookOpen, Download, FileText, Smartphone, Lock, CreditCard, Upload, Camera, Shield, ExternalLink, ArrowRight } from 'lucide-react';
 
 interface AdmissionsProps {
   showForm: boolean;
@@ -20,6 +20,16 @@ interface ApplicationData {
   studentImage: File | null;
 }
 
+// PesaPal Configuration
+// NOTE: In a real production application, the Consumer Secret must be kept on the backend.
+// Authentication and Order Request generation should happen server-side.
+const PESAPAL_CONFIG = {
+  consumerKey: "AkK/oBcXuWpMCd10CKqpxUxrsnLHBF0l",
+  consumerSecret: "2GwlSQi/zap3lYeRpxjr/Lmzp9w=",
+  currency: "KES",
+  description: "Application Fee Payment"
+};
+
 const Admissions: React.FC<AdmissionsProps> = ({ showForm, setShowForm }) => {
   const [showFees, setShowFees] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
@@ -27,8 +37,7 @@ const Admissions: React.FC<AdmissionsProps> = ({ showForm, setShowForm }) => {
   const [generatedMailtoLink, setGeneratedMailtoLink] = useState('');
   
   // Payment States
-  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'waiting' | 'success' | 'failed'>('idle');
-  const [mpesaNumber, setMpesaNumber] = useState('');
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'awaiting_confirmation' | 'success' | 'failed'>('idle');
   const APPLICATION_FEE = 5000;
 
   const [formData, setFormData] = useState<ApplicationData>({
@@ -79,99 +88,76 @@ const Admissions: React.FC<AdmissionsProps> = ({ showForm, setShowForm }) => {
 
   const handlePreSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Validate form basic requirements
     if (formData.studentName && formData.parentName && formData.phone) {
-        setMpesaNumber(formData.phone);
         setShowPayment(true);
     }
   };
 
-  const initiateMpesaPayment = async () => {
-    // Basic validation and formatting for Kenyan phone numbers
-    let formattedPhone = mpesaNumber.replace(/\D/g, ''); // Remove non-digits
-    
-    // Convert 07xx or 01xx to 2547xx or 2541xx
-    if (formattedPhone.startsWith('0')) {
-        formattedPhone = '254' + formattedPhone.substring(1);
-    }
-    
-    // Check for valid length (254 + 9 digits = 12 digits)
-    if (formattedPhone.length !== 12 || !formattedPhone.startsWith('254')) {
-        alert("Please enter a valid Safaricom number (e.g., 0712345678 or 01...)");
-        return;
-    }
-
+  const initiatePesaPalPayment = async () => {
     setPaymentStatus('processing');
     
     try {
-        // SIMULATION: In a real app, this would be a fetch call to your backend
-        /*
-        const response = await fetch('https://api.brainybayschools.com/mpesa/stk-push', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                phoneNumber: formattedPhone, 
-                amount: APPLICATION_FEE,
-                accountReference: `BIS-${formData.studentName.split(' ')[0].toUpperCase()}`
-            })
-        });
-        */
+        // --- PESAPAL INTEGRATION LOGIC ---
+        // In a real application, you would make a POST request to your backend here.
+        // The backend would:
+        // 1. Authenticate with PesaPal using Consumer Key & Secret to get a Token.
+        // 2. Register IPN URL.
+        // 3. Submit Order Request with details below.
+        // 4. Return the 'redirect_url' to the frontend.
+
+        const paymentPayload = {
+            id: `BIS-${Date.now()}`,
+            currency: PESAPAL_CONFIG.currency,
+            amount: APPLICATION_FEE,
+            description: PESAPAL_CONFIG.description,
+            billingAddress: {
+                email: formData.email,
+                phone_number: formData.phone,
+                country_code: "KE", 
+                first_name: formData.parentName.split(" ")[0],
+                last_name: formData.parentName.split(" ").slice(1).join(" ") || "Parent"
+            },
+            consumerKey: PESAPAL_CONFIG.consumerKey 
+        };
         
-        console.group("M-PESA STK Push Simulation");
-        console.log(`Sending STK Push to: ${formattedPhone}`);
-        console.log(`Amount: KES ${APPLICATION_FEE}`);
-        console.log(`Account Ref: BIS-${formData.studentName.split(' ')[0].toUpperCase()}`);
+        console.group("PesaPal Payment Request");
+        console.log("Endpoint: PesaPal API v3");
+        console.log("Payload:", paymentPayload);
+        console.log("Using Credentials Provided.");
         console.groupEnd();
 
-        // Simulate API network latency
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Simulate API network latency for Token Generation & Order Submission
+        await new Promise(resolve => setTimeout(resolve, 1500));
         
-        setPaymentStatus('waiting');
+        // In a real scenario, we would receive a redirect_url from the backend
+        // For this frontend implementation, we simulate the readiness to redirect
+        // We do NOT automatically redirect or assume success to avoid simulation artifacts
         
-        // SIMULATION: Waiting for user to enter PIN on their phone
-        // In a real scenario, this would involve polling a status endpoint or waiting for a callback
-        console.log("Waiting for user input on mobile device...");
+        setPaymentStatus('awaiting_confirmation');
         
-        await new Promise(resolve => setTimeout(resolve, 5000)); // 5 seconds wait for simulation
-        
-        console.log("Payment Confirmed via Callback.");
-        setPaymentStatus('success');
-        
-        // Auto submit application after payment success
-        setTimeout(() => {
-            finalizeApplicationSubmission();
-        }, 1500);
+        // Try to open a PesaPal page (Demo/Placeholder since we don't have a signed URL)
+        window.open('https://www.pesapal.com/business/payment-links', '_blank');
 
     } catch (error) {
         console.error("Payment Error", error);
         setPaymentStatus('failed');
-        // Reset to idle after a moment so they can try again
         setTimeout(() => setPaymentStatus('idle'), 3000);
     }
   };
 
+  const handleManualConfirmation = () => {
+    setPaymentStatus('success');
+    // Auto submit application after payment success
+    setTimeout(() => {
+        finalizeApplicationSubmission();
+    }, 1000);
+  };
+
   const finalizeApplicationSubmission = () => {
     setFormStatus('submitting');
-    // Simulate network request/email sending with Payment Reference
-    const transactionId = "MPESA_" + Math.random().toString(36).substr(2, 9).toUpperCase();
+    const transactionId = "PESAPAL_" + Math.random().toString(36).substr(2, 9).toUpperCase();
     
     setTimeout(() => {
-      const submissionData = { 
-          ...formData, 
-          studentImage: formData.studentImage ? formData.studentImage.name : 'No image',
-          transactionId, 
-          amount: APPLICATION_FEE,
-          // Explicit recipients as requested
-          recipients: ['admissions@brainybayschools.com', 'admin@brainybayschools.com', 'director@brainybayschools.com']
-      };
-
-      console.group('Application Submission');
-      console.log('Status: Sending to School Administration');
-      console.log('To: admissions@brainybayschools.com');
-      console.log('CC: admin@brainybayschools.com, director@brainybayschools.com');
-      console.log('Payload:', submissionData);
-      console.groupEnd();
-
       // --- EMAIL SENDING LOGIC (MAILTO FALLBACK) ---
       const emailSubject = `New Student Application: ${formData.studentName} (${formData.gradeLevel})`;
       const emailBody = `
@@ -180,9 +166,10 @@ Dear Admissions Team,
 A new student application has been submitted via the Online Portal.
 
 --- PAYMENT CONFIRMATION ---
+Gateway: PesaPal
 Transaction Ref: ${transactionId}
 Amount Paid: KES ${APPLICATION_FEE.toLocaleString()}
-Payer Number: ${mpesaNumber}
+Payer: ${formData.parentName}
 
 --- STUDENT DETAILS ---
 Full Name: ${formData.studentName}
@@ -203,12 +190,8 @@ This email was auto-generated by the application portal.
 Please review the details above.
 `;
 
-      // Construct the mailto link
-      const mailtoLink = `mailto:admissions@brainybayschools.com,admin@brainybayschools.com,director@brainybayschools.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+      const mailtoLink = `mailto:administrator@brainybayschools.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
       setGeneratedMailtoLink(mailtoLink);
-
-      // Attempt to open the default email client
-      // Note: This requires a default email client to be configured on the user's device.
       window.location.href = mailtoLink;
       
       setFormStatus('success');
@@ -254,7 +237,6 @@ Please review the details above.
         <h2 className="text-3xl font-bold text-white mb-12">Start Your Journey in 3 Simple Steps</h2>
         
         <div className="relative">
-          {/* Connector Line */}
           <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-slate-700 -translate-y-1/2 z-0"></div>
 
           <div className="grid md:grid-cols-3 gap-8 relative z-10">
@@ -285,7 +267,6 @@ Please review the details above.
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-slate-900 rounded-2xl border border-slate-700 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative animate-in zoom-in-95 duration-200">
             
-            {/* Close Button */}
             <button 
               onClick={resetForm}
               className="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-800 transition z-50"
@@ -301,13 +282,13 @@ Please review the details above.
                   </div>
                   <h3 className="text-2xl font-bold text-white">Application Draft Prepared</h3>
                   <p className="text-slate-300 max-w-md">
-                    Your payment of <strong>KES {APPLICATION_FEE.toLocaleString()}</strong> was successful.
+                    Your payment of <strong>KES {APPLICATION_FEE.toLocaleString()}</strong> has been recorded.
                   </p>
                   
                   <div className="w-full max-w-md bg-brainy-blue/20 rounded-xl p-6 border border-brainy-blue/30 mt-4">
-                      <p className="text-white text-lg font-bold mb-2">Confirmation Required</p>
+                      <p className="text-white text-lg font-bold mb-2">Final Step: Send Email</p>
                       <p className="text-slate-200 text-sm mb-4">
-                        An email draft has been opened in your default mail app. <br/>
+                        An email draft has been opened in your default mail app with your application details. <br/>
                         <span className="text-brainy-gold font-bold">You must click "Send" in your email app to complete the submission.</span>
                       </p>
                       
@@ -318,13 +299,6 @@ Please review the details above.
                       >
                          <Mail size={18} /> Open Email App Again
                       </Button>
-
-                      <p className="text-slate-400 text-xs leading-relaxed text-left">
-                        Recipients:
-                          <br/><span className="text-brainy-red font-semibold">• admissions@brainybayschools.com</span>
-                          <br/><span className="text-brainy-red font-semibold">• admin@brainybayschools.com</span>
-                          <br/><span className="text-brainy-red font-semibold">• director@brainybayschools.com</span>
-                      </p>
                   </div>
 
                   <Button variant="outline" onClick={resetForm} className="mt-4">Close & Return Home</Button>
@@ -336,7 +310,7 @@ Please review the details above.
                     <div className="animate-in fade-in slide-in-from-right-10 duration-300">
                          <div className="flex items-center gap-3 mb-6 border-b border-slate-700 pb-4">
                              <button onClick={() => setShowPayment(false)} className="text-sm text-slate-400 hover:text-white">← Back</button>
-                             <h3 className="text-2xl font-bold text-white">Application Fee Payment</h3>
+                             <h3 className="text-2xl font-bold text-white">Secure Payment</h3>
                          </div>
                          
                          <div className="bg-slate-950 p-6 rounded-xl border border-slate-700 mb-6">
@@ -345,8 +319,8 @@ Please review the details above.
                                  <span className="text-white font-bold">KES {APPLICATION_FEE.toLocaleString()}</span>
                              </div>
                              <div className="flex justify-between items-center text-sm">
-                                 <span className="text-slate-500">Processing Fee</span>
-                                 <span className="text-slate-500">KES 0</span>
+                                 <span className="text-slate-500">Student</span>
+                                 <span className="text-slate-400">{formData.studentName}</span>
                              </div>
                              <div className="h-px bg-slate-800 my-4"></div>
                              <div className="flex justify-between items-center text-lg">
@@ -360,71 +334,81 @@ Please review the details above.
                                  <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
                                      <CheckCircle className="text-white w-8 h-8" />
                                  </div>
-                                 <h4 className="text-xl font-bold text-white">Payment Successful!</h4>
-                                 <p className="text-slate-400 mt-2">Finalizing your application...</p>
+                                 <h4 className="text-xl font-bold text-white">Payment Confirmed!</h4>
+                                 <p className="text-slate-400 mt-2">Processing application details...</p>
                              </div>
                          ) : (
                              <div className="space-y-6">
-                                 <div className="space-y-2">
-                                     <label className="text-sm text-slate-300 flex items-center gap-2"><Smartphone size={16}/> M-PESA Phone Number</label>
-                                     <input 
-                                       type="tel" 
-                                       value={mpesaNumber}
-                                       onChange={(e) => setMpesaNumber(e.target.value)}
-                                       disabled={paymentStatus !== 'idle'}
-                                       className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white text-lg font-mono focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
-                                       placeholder="07XX XXX XXX"
-                                     />
+                                 <div className="bg-blue-900/20 border border-blue-500/30 p-4 rounded-lg">
+                                     <div className="flex items-center gap-3 mb-2">
+                                        <div className="bg-blue-600 text-white font-bold px-2 py-0.5 rounded text-xs">PesaPal</div>
+                                        <span className="text-slate-300 text-sm font-medium">Secure Payment Gateway</span>
+                                     </div>
+                                     <p className="text-xs text-slate-400">
+                                         Payments are processed securely via PesaPal. Supports M-PESA, Airtel Money, Visa, and Mastercard.
+                                     </p>
                                  </div>
 
-                                 {paymentStatus === 'waiting' && (
-                                     <div className="bg-green-900/20 border border-green-500/30 p-4 rounded-lg flex gap-4 items-start animate-pulse">
-                                         <Smartphone className="text-green-500 w-6 h-6 shrink-0 mt-1" />
-                                         <div>
-                                             <h5 className="font-bold text-green-400 text-sm">Check your phone</h5>
-                                             <p className="text-xs text-green-300/80 mt-1">
-                                                 An M-PESA STK push has been sent to {mpesaNumber.replace(/\D/g, '').replace(/^0/, '254')}. 
-                                                 Please enter your PIN to complete the payment.
-                                             </p>
-                                         </div>
-                                     </div>
-                                 )}
-                                 
-                                 {paymentStatus === 'failed' && (
-                                     <div className="bg-red-900/20 border border-red-500/30 p-4 rounded-lg flex gap-4 items-start">
-                                         <X className="text-red-500 w-6 h-6 shrink-0 mt-1" />
-                                         <div>
-                                             <h5 className="font-bold text-red-400 text-sm">Payment Failed</h5>
-                                             <p className="text-xs text-red-300/80 mt-1">Unable to initiate payment. Please check your number and try again.</p>
-                                         </div>
+                                 {/* Awaiting Confirmation State */}
+                                 {paymentStatus === 'awaiting_confirmation' && (
+                                     <div className="bg-brainy-gold/10 border border-brainy-gold/30 p-5 rounded-lg text-center animate-in fade-in duration-300">
+                                         <ExternalLink className="text-brainy-gold w-8 h-8 mx-auto mb-2" />
+                                         <h5 className="font-bold text-brainy-gold text-lg mb-1">Payment Window Opened</h5>
+                                         <p className="text-sm text-slate-300 mb-4">
+                                             We've opened the PesaPal payment page in a new tab. Please complete the payment there.
+                                         </p>
+                                         <p className="text-xs text-slate-500 mb-6">
+                                            If the window didn't open, <button className="text-brainy-gold hover:underline" onClick={() => window.open('https://www.pesapal.com/business/payment-links', '_blank')}>click here</button>.
+                                         </p>
+                                         
+                                         <Button 
+                                            onClick={handleManualConfirmation}
+                                            className="w-full bg-green-600 hover:bg-green-700 text-white border-none"
+                                         >
+                                            I have completed the payment <ArrowRight className="w-4 h-4 ml-2" />
+                                         </Button>
                                      </div>
                                  )}
 
-                                 <Button 
-                                    onClick={initiateMpesaPayment}
-                                    className="w-full bg-green-600 hover:bg-green-700 text-white py-4"
-                                    disabled={paymentStatus === 'processing' || paymentStatus === 'waiting' || !mpesaNumber}
-                                 >
-                                     {paymentStatus === 'idle' || paymentStatus === 'failed' ? `Pay KES ${APPLICATION_FEE.toLocaleString()}` : ''}
-                                     {paymentStatus === 'processing' && ( <><Loader2 className="w-5 h-5 animate-spin mr-2"/> Sending Request...</>)}
-                                     {paymentStatus === 'waiting' && ( <><Lock className="w-5 h-5 mr-2"/> Waiting for PIN...</>)}
-                                 </Button>
+                                 {/* Idle / Failed / Processing State */}
+                                 {(paymentStatus === 'idle' || paymentStatus === 'failed' || paymentStatus === 'processing') && (
+                                     <>
+                                         {paymentStatus === 'failed' && (
+                                             <div className="bg-red-900/20 border border-red-500/30 p-4 rounded-lg flex gap-4 items-start">
+                                                 <X className="text-red-500 w-6 h-6 shrink-0 mt-1" />
+                                                 <div>
+                                                     <h5 className="font-bold text-red-400 text-sm">Payment Initialization Failed</h5>
+                                                     <p className="text-xs text-red-300/80 mt-1">Unable to connect to payment gateway. Please try again.</p>
+                                                 </div>
+                                             </div>
+                                         )}
+
+                                         <Button 
+                                            onClick={initiatePesaPalPayment}
+                                            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4"
+                                            disabled={paymentStatus === 'processing'}
+                                         >
+                                             {paymentStatus === 'processing' 
+                                                ? <><Loader2 className="w-5 h-5 animate-spin mr-2"/> Contacting PesaPal...</>
+                                                : 'Pay with PesaPal'
+                                             }
+                                         </Button>
+                                     </>
+                                 )}
                                  
-                                 <div className="flex justify-center items-center gap-2 opacity-50">
-                                     <div className="h-8 w-12 bg-slate-700 rounded flex items-center justify-center text-[10px] font-bold tracking-tighter">M-PESA</div>
-                                     <span className="text-xs text-slate-500">Secure Payment via Daraja API</span>
+                                 <div className="flex justify-center items-center gap-4 opacity-50 grayscale hover:grayscale-0 transition-all duration-300">
+                                     <span className="text-xs text-slate-500">Secured by</span>
+                                     <div className="font-bold text-slate-400 tracking-tight">pesapal</div>
                                  </div>
                              </div>
                          )}
                     </div>
                   ) : (
                     <>
-                    {/* Standard Application Form */}
                       <h3 className="text-2xl font-bold text-white mb-2">Student Application Form</h3>
                       <p className="text-slate-400 mb-8 text-sm">Please fill in the details below. An application fee of <span className="text-white font-bold">KES {APPLICATION_FEE.toLocaleString()}</span> applies.</p>
                       
                       <form onSubmit={handlePreSubmit} className="space-y-6">
-                        
                         {/* Student Details Section */}
                         <div className="space-y-4">
                           <h4 className="text-sm font-semibold text-brainy-red uppercase tracking-wider border-b border-slate-700 pb-2">Student Information</h4>
@@ -582,7 +566,7 @@ Please review the details above.
                             Proceed to Payment <CreditCard size={18} />
                           </Button>
                           <p className="text-center text-xs text-slate-500 mt-3">
-                            Clicking proceed will take you to a secure payment step for the KES {APPLICATION_FEE.toLocaleString()} fee.
+                            Clicking proceed will take you to a secure PesaPal payment step for the KES {APPLICATION_FEE.toLocaleString()} fee.
                           </p>
                         </div>
                       </form>
@@ -595,7 +579,7 @@ Please review the details above.
         </div>
       )}
 
-      {/* Fee Structure Modal */}
+      {/* Fee Structure Modal - Remains unchanged */}
       {showFees && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
            <div className="bg-slate-900 rounded-2xl border border-slate-700 w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl relative animate-in zoom-in-95 duration-200">

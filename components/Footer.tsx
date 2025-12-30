@@ -26,6 +26,16 @@ const Footer: React.FC = () => {
           <div>
             <h4 className="text-white font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-sm">
+              <li>
+                <a 
+                  href="https://learn.brainybayschools.com" 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="text-brainy-gold hover:text-white transition font-medium"
+                >
+                  Student Login
+                </a>
+              </li>
               <li><a href="#" className="hover:text-brainy-red transition">Our Curriculum</a></li>
               <li><a href="#" className="hover:text-brainy-red transition">Tuition & Fees</a></li>
               <li><a href="#admissions" className="hover:text-brainy-red transition">Admissions Process</a></li>
@@ -38,11 +48,16 @@ const Footer: React.FC = () => {
             <ul className="space-y-3 text-sm">
               <li className="flex items-center gap-2">
                 <Mail size={16} className="text-brainy-red shrink-0" /> 
-                <a href="mailto:brainy@brainybayschools.com" className="hover:text-white transition">brainy@brainybayschools.com</a>
+                <a href="mailto:administrator@brainybayschools.com" className="hover:text-white transition">administrator@brainybayschools.com</a>
               </li>
-              <li className="flex items-center gap-2">
-                <Phone size={16} className="text-brainy-red shrink-0" /> 
-                <a href="tel:+254720066035" className="hover:text-white transition">+254 720 066 035</a>
+              <li className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <Phone size={16} className="text-brainy-red shrink-0" /> 
+                  <a href="tel:+254720066035" className="hover:text-white transition">+254 720 066 035</a>
+                </div>
+                <div className="flex items-center gap-2 ml-6">
+                  <a href="tel:+254720154485" className="hover:text-white transition">+254 720 154 485</a>
+                </div>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin size={16} className="text-brainy-red mt-1 shrink-0" /> 

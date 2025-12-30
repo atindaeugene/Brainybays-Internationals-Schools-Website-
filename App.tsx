@@ -10,12 +10,16 @@ import VoiceAgent from './components/VoiceAgent';
 import GlobalCommunity from './components/GlobalCommunity';
 import WhyChooseUs from './components/WhyChooseUs';
 import Contact from './components/Contact';
+import EnrollmentTrends from './components/EnrollmentTrends';
+import Testimonials from './components/Testimonials';
+import NewsTicker from './components/NewsTicker';
 
 function App() {
   const [showApplicationForm, setShowApplicationForm] = useState(false);
 
   return (
     <div className="min-h-screen bg-brainy-navy text-slate-200 font-sans selection:bg-brainy-red selection:text-white">
+      <NewsTicker />
       <Navigation onOpenApplication={() => setShowApplicationForm(true)} />
       
       <main>
@@ -23,6 +27,8 @@ function App() {
         <WhyChooseUs />
         <Curriculum />
         <GlobalCommunity />
+        <EnrollmentTrends />
+        <Testimonials />
         <CanvasSpotlight />
         <Admissions showForm={showApplicationForm} setShowForm={setShowApplicationForm} />
         <Contact />
@@ -35,4 +41,3 @@ function App() {
 }
 
 export default App;
-    

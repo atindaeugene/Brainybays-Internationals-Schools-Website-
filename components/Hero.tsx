@@ -15,9 +15,18 @@ const Hero: React.FC = () => {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-brainy-navy via-brainy-navy/95 to-brainy-navy"></div>
         
-        {/* Animated Orbs */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-brainy-blue/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-brainy-red/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        {/* Dynamic Animated Orbs */}
+        {/* Large Blue Blob - Top Left */}
+        <div className="absolute top-[10%] left-[5%] w-[30rem] h-[30rem] bg-brainy-blue/20 rounded-full blur-[100px] animate-blob mix-blend-screen pointer-events-none"></div>
+        
+        {/* Medium Red Blob - Bottom Right */}
+        <div className="absolute bottom-[10%] right-[5%] w-[25rem] h-[25rem] bg-brainy-red/15 rounded-full blur-[100px] animate-blob pointer-events-none" style={{ animationDirection: 'reverse', animationDuration: '18s' }}></div>
+        
+        {/* Small Gold Orb - Middle Right */}
+        <div className="absolute top-1/2 right-[15%] w-64 h-64 bg-brainy-gold/10 rounded-full blur-[80px] animate-float-slow pointer-events-none"></div>
+        
+        {/* Small Navy Orb - Middle Left */}
+        <div className="absolute bottom-[30%] left-[15%] w-80 h-80 bg-slate-400/5 rounded-full blur-[100px] animate-float pointer-events-none"></div>
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

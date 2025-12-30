@@ -92,7 +92,7 @@ const Contact: React.FC = () => {
       
       // Simulate processing delay
       setTimeout(() => {
-          const mailtoLink = `mailto:brainy@brainybayschools.com?subject=${encodeURIComponent("Web Inquiry: " + formData.subject)}&body=${encodeURIComponent(`Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\n\nMessage:\n${formData.message}`)}`;
+          const mailtoLink = `mailto:administrator@brainybayschools.com?subject=${encodeURIComponent("Web Inquiry: " + formData.subject)}&body=${encodeURIComponent(`Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\n\nMessage:\n${formData.message}`)}`;
           window.location.href = mailtoLink;
           setIsSubmitting(false);
           setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
@@ -159,9 +159,14 @@ const Contact: React.FC = () => {
                    <div>
                       <h5 className="text-white font-medium mb-1">Call Us</h5>
                       <p className="text-slate-400 text-sm mb-1">Mon-Fri from 8am to 5pm</p>
-                      <a href="tel:+254720066035" className="text-white hover:text-brainy-gold transition font-mono">
-                        +254 720 066 035
-                      </a>
+                      <div className="flex flex-col gap-1">
+                        <a href="tel:+254720066035" className="text-white hover:text-brainy-gold transition font-mono">
+                          +254 720 066 035
+                        </a>
+                        <a href="tel:+254720154485" className="text-white hover:text-brainy-gold transition font-mono">
+                          +254 720 154 485
+                        </a>
+                      </div>
                    </div>
                 </div>
 
@@ -172,8 +177,8 @@ const Contact: React.FC = () => {
                    <div>
                       <h5 className="text-white font-medium mb-1">Email Us</h5>
                       <p className="text-slate-400 text-sm mb-1">For general inquiries</p>
-                      <a href="mailto:brainy@brainybayschools.com" className="text-white hover:text-brainy-gold transition">
-                        brainy@brainybayschools.com
+                      <a href="mailto:administrator@brainybayschools.com" className="text-white hover:text-brainy-gold transition">
+                        administrator@brainybayschools.com
                       </a>
                       <p className="text-slate-400 text-sm mt-2">For admissions</p>
                        <a href="mailto:admissions@brainybayschools.com" className="text-white hover:text-brainy-gold transition">
@@ -325,4 +330,3 @@ const Contact: React.FC = () => {
 };
 
 export default Contact;
-    
